@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using System.Web.Http.Cors;
+
 namespace BeachHouseAPI.Controllers
 {
     [ApiController]
@@ -14,6 +16,7 @@ namespace BeachHouseAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly BeachHouseDBContext _context;
+
         public object Summaries { get; private set; }
 
         public UserController(BeachHouseDBContext context)
@@ -21,27 +24,59 @@ namespace BeachHouseAPI.Controllers
             _context = context;
         }
 
+ 
         [HttpGet("/user")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
-            return await _context.User.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
-        // POST: api/Movies
-        [HttpPost("/user")]
-        public async Task<ActionResult<User>> SingIn(User user)
+        [HttpPost("/user/sign_in")]
+        public async Task<ActionResult> SignIn()
         {
-            if (UserExists(user.Id) == false)
+            string header;
+            long user_id;
+            header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
+
+            user_id = long.Parse(header.ToString());
+
+            Users user;
+            user = GetUser(user_id);
+
+            if (user == null)
             {
-                _context.User.Add(user);
+                user = new Users();
+                user.Id = user_id;
+                user.Role = 0;
+                user.Active = true;
+                _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+                return Ok();
             }
-            return Ok();
+            else if (user.Active == false)
+            {
+                return Unauthorized();
+            }
+            else 
+            {
+                return Ok();
+            }
         }
 
-        private bool UserExists(int id)
+        private Users GetUser(long id)
         {
-            return _context.User.Any(e => e.Id == id);
+            Users user;
+            user = _context.Users.FirstOrDefault(e => e.Id == id);
+
+            return user;
+        }
+
+        private Users GetIdFromHeader(long id)
+        {
+            Users user;
+            user = _context.Users.FirstOrDefault(e => e.Id == id);
+
+            return user;
         }
     }
 }

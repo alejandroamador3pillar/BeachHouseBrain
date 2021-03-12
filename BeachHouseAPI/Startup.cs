@@ -36,6 +36,13 @@ namespace BeachHouseAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BeachHouseAPI", Version = "v1" });
             });
+            services.AddCors(options => options.AddPolicy("Cors",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +53,7 @@ namespace BeachHouseAPI
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BeachHouseAPI v1"));
+                app.UseCors("Cors");
             }
 
             app.UseHttpsRedirection();

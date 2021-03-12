@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace BeachHouseAPI.Models
 {
-    public partial class User
+    public partial class Users
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public int Role { get; set; }
         public bool? Active { get; set; }
     }

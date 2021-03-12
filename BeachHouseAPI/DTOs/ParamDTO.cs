@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-#nullable disable
-
-namespace BeachHouseAPI.Models
+namespace BeachHouseAPI.DTOs
 {
-    public partial class Params
+    public class ParamDTO
     {
         public int Id { get; set; }
-        public string Description { get; set; }
         public string Value { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
     }
 }
