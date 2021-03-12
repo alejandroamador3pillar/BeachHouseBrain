@@ -34,20 +34,45 @@ namespace BeachHouseAPI.Controllers
         [HttpPost("/params")]
         public async Task<ActionResult> UpdateParam([FromBody] ParamDTO value)
         {
-            Params param;
-            param = GetParam(value.Id);
+            string header;
+            long user_id;
+            header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
 
-            if (param == null)
+            user_id = long.Parse(header.ToString());
+
+            Users user;
+            user = GetUser(user_id);
+
+            if (user == null)
             {
-                return NotFound();
+                return Unauthorized();
             }
             else
             {
-                param.Value = value.Value;
-                param.StartDate = value.StartDate;
-                param.EndDate = value.EndDate;
-                await _context.SaveChangesAsync();
-                return Ok();
+                Params param;
+                param = GetParam(value.Id);
+
+                if (param == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    if (user.Active == true && user.Role == 0) //Role 0 = Admin
+                    {
+                        param.Value = value.Value;
+                        param.StartDate = value.StartDate;
+                        param.EndDate = value.EndDate;
+                        param.LastModified = DateTime.UtcNow;
+                        param.UpdatedBy = user.Id;
+                        await _context.SaveChangesAsync();
+                        return Ok();
+                    }
+                    else
+                    {
+                        return Unauthorized();
+                    }
+                }
             }
         }
 
@@ -57,6 +82,14 @@ namespace BeachHouseAPI.Controllers
             param = _context.Params.FirstOrDefault(e => e.Id == id);
 
             return param;
+        }
+
+        private Users GetUser(long id)
+        {
+            Users user;
+            user = _context.Users.FirstOrDefault(e => e.Id == id);
+
+            return user;
         }
 
 

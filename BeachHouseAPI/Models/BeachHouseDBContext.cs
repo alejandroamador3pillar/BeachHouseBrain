@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-#nullable disable
-
 namespace BeachHouseAPI.Models
 {
     public partial class BeachHouseDBContext : DbContext
@@ -17,6 +15,7 @@ namespace BeachHouseAPI.Models
         {
         }
 
+        public virtual DbSet<Logs> Logs { get; set; }
         public virtual DbSet<Params> Params { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
@@ -24,48 +23,56 @@ namespace BeachHouseAPI.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseSqlServer("Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
+            modelBuilder.Entity<Logs>(entity =>
+            {
+                entity.Property(e => e.Level).HasMaxLength(128);
+
+                entity.Property(e => e.TimeStamp).HasColumnType("datetime");
+            });
 
             modelBuilder.Entity<Params>(entity =>
             {
-                entity.ToTable("Params");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .IsRequired()
+                    .HasColumnName("description")
                     .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasColumnName("description");
+                    .IsUnicode(false);
 
                 entity.Property(e => e.EndDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("end_date");
+                    .HasColumnName("end_date")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.LastModified)
+                    .HasColumnName("last_modified")
+                    .HasColumnType("datetime");
 
                 entity.Property(e => e.StartDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("start_date");
+                    .HasColumnName("start_date")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
 
                 entity.Property(e => e.Value)
                     .IsRequired()
+                    .HasColumnName("value")
                     .HasMaxLength(50)
-                    .IsUnicode(false)
-                    .HasColumnName("value");
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.ToTable("Users");
-
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
-                    .HasColumnName("id");
+                    .HasColumnName("id")
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Active)
                     .IsRequired()

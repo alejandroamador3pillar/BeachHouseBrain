@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace BeachHouseAPI.Models
 {
     public partial class Params
@@ -12,5 +10,8 @@ namespace BeachHouseAPI.Models
         public string Value { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public long UpdatedBy { get; set; }
+        public DateTime LastModified { get; set; }
+
     }
 }
