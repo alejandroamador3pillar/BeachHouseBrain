@@ -31,7 +31,7 @@ namespace BeachHouseAPI.Controllers
             return await _context.Users.ToListAsync();
         }
 
-        [HttpPost("/user/sign_in")]
+        [HttpPost("/user/sign_in/test")]
         public async Task<ActionResult> SignIn()
         {
             string header;
