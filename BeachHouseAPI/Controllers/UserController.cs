@@ -73,6 +73,7 @@ namespace BeachHouseAPI.Controllers
 
         private Users GetIdFromHeader(long id)
         {
+
             Users user;
             user = _context.Users.FirstOrDefault(e => e.Id == id);
 

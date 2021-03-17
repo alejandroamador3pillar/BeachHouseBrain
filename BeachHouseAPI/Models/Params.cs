@@ -13,5 +13,6 @@ namespace BeachHouseAPI.Models
         public long UpdatedBy { get; set; }
         public DateTime LastModified { get; set; }
 
+        public virtual Users UpdatedByNavigation { get; set; }
     }
 }

@@ -15,21 +15,33 @@ namespace BeachHouseAPI.Models
         {
         }
 
+        public virtual DbSet<Locations> Locations { get; set; }
         public virtual DbSet<Logs> Logs { get; set; }
         public virtual DbSet<Params> Params { get; set; }
+        public virtual DbSet<ReservationDetails> ReservationDetails { get; set; }
+        public virtual DbSet<Reservations> Reservations { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseSqlServer("Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Locations>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<Logs>(entity =>
             {
                 entity.Property(e => e.Level).HasMaxLength(128);
@@ -66,6 +78,56 @@ namespace BeachHouseAPI.Models
                     .HasColumnName("value")
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.UpdatedByNavigation)
+                    .WithMany(p => p.Params)
+                    .HasForeignKey(d => d.UpdatedBy)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Params_ToUser");
+            });
+
+            modelBuilder.Entity<ReservationDetails>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.ReservationId });
+
+                entity.Property(e => e.ReservationId).HasColumnName("reservation_id");
+
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("date");
+
+                entity.Property(e => e.Rate).HasColumnName("rate");
+
+                entity.HasOne(d => d.Reservation)
+                    .WithMany(p => p.ReservationDetails)
+                    .HasForeignKey(d => d.ReservationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ReservationDetails_ToMaster");
+            });
+
+            modelBuilder.Entity<Reservations>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.LocationId).HasColumnName("location_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.Location)
+                    .WithMany(p => p.Reservations)
+                    .HasForeignKey(d => d.LocationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Location_ToReservation");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Reservations)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Users_ToReservation");
             });
 
             modelBuilder.Entity<Users>(entity =>

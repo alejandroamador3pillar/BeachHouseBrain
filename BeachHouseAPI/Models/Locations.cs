@@ -3,19 +3,16 @@ using System.Collections.Generic;
 
 namespace BeachHouseAPI.Models
 {
-    public partial class Users
+    public partial class Locations
     {
-        public Users()
+        public Locations()
         {
-            Params = new HashSet<Params>();
             Reservations = new HashSet<Reservations>();
         }
 
         public long Id { get; set; }
-        public int Role { get; set; }
-        public bool? Active { get; set; }
+        public string Description { get; set; }
 
-        public virtual ICollection<Params> Params { get; set; }
         public virtual ICollection<Reservations> Reservations { get; set; }
     }
 }
