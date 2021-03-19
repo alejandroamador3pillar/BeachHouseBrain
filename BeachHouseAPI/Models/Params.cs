@@ -10,7 +10,7 @@ namespace BeachHouseAPI.Models
         public string Value { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public long UpdatedBy { get; set; }
+        public string UpdatedBy { get; set; }
         public DateTime LastModified { get; set; }
 
         public virtual Users UpdatedByNavigation { get; set; }

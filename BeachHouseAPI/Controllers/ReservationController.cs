@@ -57,10 +57,10 @@ namespace BeachHouseAPI.Controllers
         public async Task<ActionResult> Reserve([FromBody] ReservationDTO value)
         {
             string header;
-            long user_id;
+            string user_id;
             header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
 
-             user_id = long.Parse(header.ToString());
+             user_id = header.ToString();
 
             Users user;
             Reservations res;
@@ -84,12 +84,22 @@ namespace BeachHouseAPI.Controllers
                 _context.Reservations.Add(res);                
                 
                 await _context.SaveChangesAsync();
-                CreateDetailLines(res.Id, value.StartDate, value.Nights);
-                return Ok();
+                if (ValidDates(value.StartDate, value.Nights))
+                {
+                    CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                else
+                {
+                    _context.Remove(res);
+                    await _context.SaveChangesAsync();
+                    return BadRequest();
+                }
             }
         }
 
-        private Users GetUser(long id)
+        private Users GetUser(string id)
         {
             Users user;
             user = _context.Users.FirstOrDefault(e => e.Id == id);
@@ -111,6 +121,19 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
+        private bool ValidDates(DateTime startDate, int nights)
+        {
+            bool valid = true;
+            for (DateTime day = startDate; day < startDate.AddDays(nights); day = day.AddDays(1))
+            {
+                if (IsAvailableDate(day) == false)
+                {
+                    valid = false;
+                }
+            }
+            return valid;
+        }
+
         private void CreateDetailLines(long res_id, DateTime startDate, int nights) 
         {
 
@@ -123,7 +146,6 @@ namespace BeachHouseAPI.Controllers
                 line.Date = day;
                 _context.ReservationDetails.Add(line);
             }
-            _context.SaveChangesAsync();
         }
 
     }

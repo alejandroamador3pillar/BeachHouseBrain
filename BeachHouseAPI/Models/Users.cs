@@ -11,7 +11,7 @@ namespace BeachHouseAPI.Models
             Reservations = new HashSet<Reservations>();
         }
 
-        public long Id { get; set; }
+        public string Id { get; set; }
         public int Role { get; set; }
         public bool? Active { get; set; }
 

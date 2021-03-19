@@ -12,7 +12,7 @@ namespace BeachHouseAPI.Models
 
         public long Id { get; set; }
         public DateTime Date { get; set; }
-        public long UserId { get; set; }
+        public string UserId { get; set; }
         public long LocationId { get; set; }
         public bool Active { get; set; }
 

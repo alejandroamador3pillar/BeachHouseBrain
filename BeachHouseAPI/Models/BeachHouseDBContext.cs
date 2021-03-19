@@ -72,7 +72,11 @@ namespace BeachHouseAPI.Models
                     .HasColumnName("start_date")
                     .HasColumnType("datetime");
 
-                entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+                entity.Property(e => e.UpdatedBy)
+                    .IsRequired()
+                    .HasColumnName("updated_by")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Value)
                     .IsRequired()
@@ -118,7 +122,11 @@ namespace BeachHouseAPI.Models
 
                 entity.Property(e => e.LocationId).HasColumnName("location_id");
 
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.HasOne(d => d.Location)
                     .WithMany(p => p.Reservations)
@@ -137,7 +145,8 @@ namespace BeachHouseAPI.Models
             {
                 entity.Property(e => e.Id)
                     .HasColumnName("id")
-                    .ValueGeneratedNever();
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Active)
                     .IsRequired()

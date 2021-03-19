@@ -35,10 +35,10 @@ namespace BeachHouseAPI.Controllers
         public async Task<ActionResult> UpdateParam([FromBody] ParamDTO value)
         {
             string header;
-            long user_id;
+            string user_id;
             header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
 
-            user_id = long.Parse(header.ToString());
+            user_id = header.ToString();
 
             Users user;
             user = GetUser(user_id);
@@ -85,7 +85,7 @@ namespace BeachHouseAPI.Controllers
             return param;
         }
 
-        private Users GetUser(long id)
+        private Users GetUser(string id)
         {
             Users user;
             user = _context.Users.FirstOrDefault(e => e.Id == id);
