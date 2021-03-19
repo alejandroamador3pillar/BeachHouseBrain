@@ -31,7 +31,7 @@ namespace BeachHouseAPI.Controllers
             return await _context.Users.ToListAsync();
         }
 
-        [HttpPost("/user/sign_in/test")]
+        [HttpPost("/user/sign_in")]
         public async Task<ActionResult> SignIn()
         {
             string header;
@@ -71,13 +71,5 @@ namespace BeachHouseAPI.Controllers
             return user;
         }
 
-        private Users GetIdFromHeader(long id)
-        {
-
-            Users user;
-            user = _context.Users.FirstOrDefault(e => e.Id == id);
-
-            return user;
-        }
     }
 }

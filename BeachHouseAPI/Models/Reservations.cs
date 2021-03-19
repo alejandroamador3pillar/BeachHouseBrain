@@ -14,6 +14,7 @@ namespace BeachHouseAPI.Models
         public DateTime Date { get; set; }
         public long UserId { get; set; }
         public long LocationId { get; set; }
+        public bool Active { get; set; }
 
         public virtual Locations Location { get; set; }
         public virtual Users User { get; set; }

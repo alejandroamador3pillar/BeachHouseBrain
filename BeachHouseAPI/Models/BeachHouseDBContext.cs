@@ -26,6 +26,7 @@ namespace BeachHouseAPI.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseSqlServer("Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;");
             }
         }
@@ -90,6 +91,8 @@ namespace BeachHouseAPI.Models
             {
                 entity.HasKey(e => new { e.Id, e.ReservationId });
 
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
                 entity.Property(e => e.ReservationId).HasColumnName("reservation_id");
 
                 entity.Property(e => e.Date)
@@ -107,7 +110,7 @@ namespace BeachHouseAPI.Models
 
             modelBuilder.Entity<Reservations>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Active).HasColumnName("active");
 
                 entity.Property(e => e.Date)
                     .HasColumnName("date")

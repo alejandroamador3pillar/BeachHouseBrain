@@ -27,13 +27,12 @@ namespace BeachHouseAPI.Controllers
             _context = context;
         }
 
-
-        [HttpGet("/reservation")]
+        [HttpGet("/reservation/available_dates")]
         public ActionResult<IEnumerable<AvailableDatesSerializer>> GetAvailableDates([FromBody] AvailableDatesDTO value)
         {
             if (value == null)
             {
-                return NotFound();
+                return NotFound(); ////// revisar
             }
             else
             {
@@ -54,6 +53,50 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
+        [HttpPost("/reservation")]
+        public async Task<ActionResult> Reserve([FromBody] ReservationDTO value)
+        {
+            string header;
+            long user_id;
+            header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
+
+             user_id = long.Parse(header.ToString());
+
+            Users user;
+            Reservations res;
+            user = GetUser(user_id);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            else  if (user.Active == false) 
+            {
+                return Unauthorized();
+            }
+            else
+            {
+                res = new Reservations();
+                res.Date = DateTime.UtcNow;
+                res.LocationId = 1;
+                res.UserId = user_id;
+                res.Active = true;
+                _context.Reservations.Add(res);                
+                
+                await _context.SaveChangesAsync();
+                CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                return Ok();
+            }
+        }
+
+        private Users GetUser(long id)
+        {
+            Users user;
+            user = _context.Users.FirstOrDefault(e => e.Id == id);
+
+            return user;
+        }
+
         private bool IsAvailableDate(DateTime date)
         {
 
@@ -67,5 +110,21 @@ namespace BeachHouseAPI.Controllers
                 return false;
             }
         }
+
+        private void CreateDetailLines(long res_id, DateTime startDate, int nights) 
+        {
+
+            ReservationDetails line;
+            for (DateTime day = startDate; day < startDate.AddDays(nights); day = day.AddDays(1))
+            {
+                line = new ReservationDetails();
+                line.ReservationId = res_id;
+                line.Rate = 999;
+                line.Date = day;
+                _context.ReservationDetails.Add(line);
+            }
+            _context.SaveChangesAsync();
+        }
+
     }
 }

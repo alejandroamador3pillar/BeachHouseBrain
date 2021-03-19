@@ -31,7 +31,7 @@ namespace BeachHouseAPI.Controllers
             return await _context.Params.ToListAsync();
         }
 
-        [HttpPost("/params")]
+        [HttpPut("/params")]
         public async Task<ActionResult> UpdateParam([FromBody] ParamDTO value)
         {
             string header;
@@ -61,6 +61,7 @@ namespace BeachHouseAPI.Controllers
                     if (user.Active == true && user.Role == 0) //Role 0 = Admin
                     {
                         param.Value = value.Value;
+                        param.Description = value.Description;
                         param.StartDate = value.StartDate;
                         param.EndDate = value.EndDate;
                         param.LastModified = DateTime.UtcNow;
