@@ -26,8 +26,8 @@ namespace BeachHouseAPI.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;");
+                //optionsBuilder.UseSqlServer("Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=tcp:beachhouse-test.database.windows.net,1433;Initial Catalog=beachhouse;Persist Security Info=False;User ID=beachhouseadmin;Password=Mjcg7982;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
             }
         }
 
@@ -152,6 +152,22 @@ namespace BeachHouseAPI.Models
                     .IsRequired()
                     .HasColumnName("active")
                     .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.Email).HasColumnName("email");
+
+                entity.Property(e => e.FirstName)
+                    .HasColumnName("first_name")
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
+                entity.Property(e => e.LastName)
+                    .HasColumnName("last_name")
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
+                entity.Property(e => e.Phone).HasColumnName("phone");
 
                 entity.Property(e => e.Role).HasColumnName("role");
             });

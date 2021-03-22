@@ -1,4 +1,5 @@
-﻿using BeachHouseAPI.Models;
+﻿using BeachHouseAPI.DTOs;
+using BeachHouseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,7 @@ namespace BeachHouseAPI.Controllers
         }
 
         [HttpPost("/user/sign_in")]
-        public async Task<ActionResult> SignIn()
+        public async Task<ActionResult> SignIn([FromBody] UserDTO value)
         {
             string header;
             string user_id;
@@ -49,6 +50,10 @@ namespace BeachHouseAPI.Controllers
                 user.Id = user_id;
                 user.Role = 0;
                 user.Active = true;
+                user.Email = value.Email;
+                user.FirstName = value.FirstName;
+                user.LastName = value.LastName;
+                user.Phone = value.Phone;
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
                 return Ok();
