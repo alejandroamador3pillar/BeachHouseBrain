@@ -1,16 +1,15 @@
 ﻿using BeachHouseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text.Json;
-
-using System.Web.Http.Cors;
 using BeachHouseAPI.DTOs;
 using BeachHouseAPI.Serializers;
+using System.Net.Mail;
+using System.Net.Mime;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace BeachHouseAPI.Controllers
 {
@@ -88,6 +87,7 @@ namespace BeachHouseAPI.Controllers
                 {
                     CreateDetailLines(res.Id, value.StartDate, value.Nights);
                     await _context.SaveChangesAsync();
+                    SendReservationEmailAsync();
                     return Ok();
                 }
                 else
@@ -146,6 +146,19 @@ namespace BeachHouseAPI.Controllers
                 line.Date = day;
                 _context.ReservationDetails.Add(line);
             }
+        }
+
+        private async Task SendReservationEmailAsync()
+        {
+            var apiKey = "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";
+            var client = new SendGridClient(apiKey);
+            var from = new EmailAddress("aleamadorq@gmail.com", "Mail Example User");
+            var subject = "Sending with SendGrid is Fun";
+            var to = new EmailAddress("alejandro.amador@3pillarglobal.com", "Example User Mail");
+            var plainTextContent = "and easy to do anywhere, even with C#";
+            var htmlContent = "<strong>and easy to do anywhere, even with C#</strong>";
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+            var response = await client.SendEmailAsync(msg);
         }
 
     }
