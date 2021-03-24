@@ -102,7 +102,7 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
-        [HttpPost("/reservation/cancel")]
+        [HttpPut("/reservation/cancel")]
         public async Task<ActionResult> Cancel()
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
@@ -116,6 +116,10 @@ namespace BeachHouseAPI.Controllers
             if (user == null)
             {
                 return Unauthorized("You have no permission to perform this action");
+            }
+            if (res == null)
+            {
+                return NotFound("Reservation does not exist");
             }
             else if (user.Active == false)
             {
@@ -157,6 +161,7 @@ namespace BeachHouseAPI.Controllers
             //res = _context.Reservations.FirstOrDefault(e => e.Id.ToString() == id);
             res = _context.Reservations
                     .Include(p => p.ReservationDetails)
+                    .Include(p => p.User)
                     .Where(p => p.Id.ToString() == id).FirstOrDefault();
 
             return res;
@@ -208,7 +213,7 @@ namespace BeachHouseAPI.Controllers
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
             var subject = " Beach House Reservation ID:" + res.Id + " has been created!";
-            var to = new EmailAddress("alejandro.amador@3pillarglobal.com", "Example User Mail");
+            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
             var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
             var htmlContent = "<strong>" + "Reservation " + res.Id + " has been created on: " + res.Date.ToShortDateString() + " <br> nights: " + res.ReservationDetails.Count() + " <br> From:" + res.ReservationDetails.FirstOrDefault().Date.ToShortDateString() + " to: " + res.ReservationDetails.LastOrDefault().Date.ToShortDateString() + " <br> Total: $" + res.ReservationDetails.Sum(x => x.Rate) + " </strong>" ;
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
@@ -221,8 +226,8 @@ namespace BeachHouseAPI.Controllers
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
             var subject = " Beach House Reservation ID:" + res.Id + " has been canceled!";
-            var to = new EmailAddress("alejandro.amador@3pillarglobal.com", "Example User Mail");
-            var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
+            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
+            var plainTextContent = "Reservation " + res.Id + " has been cancelled.";
             var htmlContent = "<strong>" + "Reservation " + res.Id + " has been cancelled. </strong>";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await client.SendEmailAsync(msg);
