@@ -29,8 +29,8 @@ namespace BeachHouseAPI.Controllers
         public ReservationController(BeachHouseDBContext context)
         {
             _context = context;
-            apiKeySendGridA = "TEST"; //PLEASE request sendgrid keys if you need to test email notifications
-            apiKeySendGridB = "TEST";
+            apiKeySendGridA = "test"; //PLEASE request sendgrid keys if you need to test email 
+            apiKeySendGridB = "test";
         }
 
         [HttpGet("/reservation/available_dates")]
@@ -206,7 +206,7 @@ namespace BeachHouseAPI.Controllers
         {
             var apiKey = apiKeySendGridA + apiKeySendGridB; 
             var client = new SendGridClient(apiKey);
-            var from = new EmailAddress("beachhousealerts@outlook.com", "Beach House Alerts");
+            var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
             var subject = " Beach House Reservation ID:" + res.Id + " has been created!";
             var to = new EmailAddress("alejandro.amador@3pillarglobal.com", "Example User Mail");
             var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
@@ -219,7 +219,7 @@ namespace BeachHouseAPI.Controllers
         {
             var apiKey = apiKeySendGridA + apiKeySendGridB;
             var client = new SendGridClient(apiKey);
-            var from = new EmailAddress("beachhousealerts@outlook.com", "Beach House Alerts");
+            var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
             var subject = " Beach House Reservation ID:" + res.Id + " has been canceled!";
             var to = new EmailAddress("alejandro.amador@3pillarglobal.com", "Example User Mail");
             var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
