@@ -26,7 +26,7 @@ namespace BeachHouseAPI.Controllers
         }
 
  
-        [HttpGet("/user")]
+        [HttpGet("/users")]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
@@ -68,7 +68,17 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
-        private Users GetUser(string id)
+        [HttpGet("/user")]
+        public ActionResult<Users> GetUser()
+        {
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+            Users user;
+            user = GetUser(user_id);
+
+            return user;
+        }
+
+            private Users GetUser(string id)
         {
             Users user;
             user = _context.Users.FirstOrDefault(e => e.Id == id);

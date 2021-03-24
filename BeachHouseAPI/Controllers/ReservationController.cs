@@ -12,6 +12,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Web.Administration;
+using System.Configuration;
 
 namespace BeachHouseAPI.Controllers
 {
@@ -20,8 +21,8 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly BeachHouseDBContext _context;
-        private string apiKeySendGridA = WebConfigurationManager.AppSettings["PFUserName"];
-        private string apiKeySendGridB = "Xx6QzLXmMEaK6gduJYR39dp9FAUTu4iHYdc-uwZtoQ8";
+        private string apiKeySendGridA = ConfigurationManager.AppSettings["SendGridKeyA"];
+        private string apiKeySendGridB = ConfigurationManager.AppSettings["SendGridKeyB"];
 
         public object Summaries { get; private set; }
 
