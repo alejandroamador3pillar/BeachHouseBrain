@@ -19,8 +19,6 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly BeachHouseDBContext _context;
-        private string apiKeySendGridA = "SG._BVnZXkYSESTpHpq6BTmtA.";
-        private string apiKeySendGridB = "H9r_hZOu1AZBhpEj6G-CVIRIusyoIe-BoR2rEdQxMZM";
 
         public object Summaries { get; private set; }
 
