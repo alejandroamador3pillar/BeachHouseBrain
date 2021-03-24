@@ -117,7 +117,7 @@ namespace BeachHouseAPI.Controllers
             {
                 return Unauthorized("Your user has been deactivated by admin");
             }
-            else if (user.Id != res.UserId && user.Role == 1) 
+            else if (user.Id != res.UserId && user.Role == 0) 
             {
                 return Unauthorized("You have no permission to perform this action");
             }
