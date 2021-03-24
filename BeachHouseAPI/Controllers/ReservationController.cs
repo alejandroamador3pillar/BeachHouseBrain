@@ -21,14 +21,16 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly BeachHouseDBContext _context;
-        private string apiKeySendGridA = ConfigurationManager.AppSettings["SendGridKeyA"];
-        private string apiKeySendGridB = ConfigurationManager.AppSettings["SendGridKeyB"];
+        private string apiKeySendGridA;
+        private string apiKeySendGridB;
 
         public object Summaries { get; private set; }
 
         public ReservationController(BeachHouseDBContext context)
         {
             _context = context;
+            apiKeySendGridA = "TEST"; //PLEASE request sendgrid keys if you need to test email notifications
+            apiKeySendGridB = "TEST";
         }
 
         [HttpGet("/reservation/available_dates")]

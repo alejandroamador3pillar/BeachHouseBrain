@@ -24,7 +24,6 @@ namespace BeachHouseAPI.Controllers
         {
             _context = context;
         }
-
  
         [HttpGet("/users")]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
