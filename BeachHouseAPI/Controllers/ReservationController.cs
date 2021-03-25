@@ -29,8 +29,8 @@ namespace BeachHouseAPI.Controllers
         public ReservationController(BeachHouseDBContext context)
         {
             _context = context;
-            apiKeySendGridA = "test"; //PLEASE request sendgrid keys if you need to test email 
-            apiKeySendGridB = "test";
+            apiKeySendGridA = ConfigurationManager.AppSettings.Get("SendGridKeyA"); //PLEASE request sendgrid keys if you need to test email 
+            apiKeySendGridB = ConfigurationManager.AppSettings.Get("SendGridKeyB");
         }
 
         [HttpGet("/reservation/available_dates")]
@@ -90,7 +90,7 @@ namespace BeachHouseAPI.Controllers
                 {
                     CreateDetailLines(res.Id, value.StartDate, value.Nights);
                     await _context.SaveChangesAsync();
-                    await SendReservationEmailAsync(res);
+                    SendReservationEmail(res);
                     return Ok();
                 }
                 else
@@ -142,7 +142,7 @@ namespace BeachHouseAPI.Controllers
 
                 res.Active = false;
                 await _context.SaveChangesAsync();
-                await SendCancelEmailAsync(res);
+                SendCancelEmail(res);
                 return Ok();
             }
         }
@@ -207,28 +207,60 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
-        private async Task SendReservationEmailAsync(Reservations res)
+        private EmailAddress GetAdminEmailAddress()
         {
-            var apiKey = apiKeySendGridA + apiKeySendGridB; 
-            var client = new SendGridClient(apiKey);
-            var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
-            var subject = " Beach House Reservation ID:" + res.Id + " has been created!";
-            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
-            var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
-            var htmlContent = "<strong>" + "Reservation " + res.Id + " has been created on: " + res.Date.ToShortDateString() + " <br> nights: " + res.ReservationDetails.Count() + " <br> From:" + res.ReservationDetails.FirstOrDefault().Date.ToShortDateString() + " to: " + res.ReservationDetails.LastOrDefault().Date.ToShortDateString() + " <br> Total: $" + res.ReservationDetails.Sum(x => x.Rate) + " </strong>" ;
-            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-            var response = await client.SendEmailAsync(msg);
+            Params param = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("NotificationParamId"));
+            return new EmailAddress(param.Value, "BeachHouseAPI Admin");
         }
 
-        private async Task SendCancelEmailAsync(Reservations res)
+        private string getTAndCUrl()
+        {
+            Params param = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("TermsConditionsParamId"));
+            return param.Value;
+        }
+
+        private string getCheckInCheckOut()
+        {
+            Params checkin = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("CheckInParamId"));
+            Params checkout = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("CheckOutParamId"));
+
+            string htmltag = "<BR> Check in: " + checkin.Value + " Check Out: " + checkout.Value + "<BR>";
+
+            return htmltag;
+        }
+
+        private void SendReservationEmail(Reservations res)
+        {
+            var subject = " Beach House Reservation ID:" + res.Id + " has been created!";
+            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
+            var toAdmin = GetAdminEmailAddress();
+
+            var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
+            var htmlContent = "<strong>" + "Reservation " + res.Id + " has been created on: " + res.Date.ToShortDateString() + " <br> nights: " + res.ReservationDetails.Count() + getCheckInCheckOut() + " <br> From:" + res.ReservationDetails.FirstOrDefault().Date.ToShortDateString() + " to: " + res.ReservationDetails.LastOrDefault().Date.ToShortDateString() + " <br> Total: $" + res.ReservationDetails.Sum(x => x.Rate) +
+                              "<br>If required, we'll call you to:" + res.User.Phone + "  <br> <a href = " + getTAndCUrl() + " > Terms And Conditions </ a > </strong>";
+
+            var emailToUser = SendEmailAsync(subject, to, plainTextContent, htmlContent);
+            var emailToAdmin = SendEmailAsync(subject, toAdmin, plainTextContent, htmlContent);
+        }
+
+        private void SendCancelEmail(Reservations res)
+        {
+            var subject = " Beach House Reservation ID:" + res.Id + " has been canceled!";
+            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
+            var toAdmin = GetAdminEmailAddress();
+
+            var plainTextContent = "Reservation " + res.Id + " has been cancelled.";
+            var htmlContent = "<strong>" + "Your reservation " + res.Id + " has been cancelled. <br>If required, we'll call you to:" + res.User.Phone + "  <br> <a href = " + getTAndCUrl() + " > Terms And Conditions </ a > </strong>"; ;
+
+            var emailToUser = SendEmailAsync(subject, to, plainTextContent, htmlContent);
+            var emailToAdmin = SendEmailAsync(subject, toAdmin, plainTextContent, htmlContent);
+        }
+
+        private async Task SendEmailAsync(string subject, EmailAddress to, string plainTextContent, string htmlContent)
         {
             var apiKey = apiKeySendGridA + apiKeySendGridB;
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("alertsbeachhouse@outlook.com", "Beach House Alerts");
-            var subject = " Beach House Reservation ID:" + res.Id + " has been canceled!";
-            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
-            var plainTextContent = "Reservation " + res.Id + " has been cancelled.";
-            var htmlContent = "<strong>" + "Reservation " + res.Id + " has been cancelled. </strong>";
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await client.SendEmailAsync(msg);
         }

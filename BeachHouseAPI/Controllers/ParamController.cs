@@ -34,11 +34,7 @@ namespace BeachHouseAPI.Controllers
         [HttpPut("/params")]
         public async Task<ActionResult> UpdateParam([FromBody] ParamDTO value)
         {
-            string header;
-            string user_id;
-            header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
-
-            user_id = header.ToString();
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
             Users user;
             user = GetUser(user_id);
@@ -58,7 +54,7 @@ namespace BeachHouseAPI.Controllers
                 }
                 else
                 {
-                    if (user.Active == true && user.Role == 0) //Role 0 = Admin
+                    if (user.Active == true && user.Role == 1) //Role 1 = Admin
                     {
                         param.Value = value.Value;
                         param.Description = value.Description;
