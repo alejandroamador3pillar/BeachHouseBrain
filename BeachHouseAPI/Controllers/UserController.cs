@@ -68,7 +68,7 @@ namespace BeachHouseAPI.Controllers
         }
 
         [HttpGet("/user")]
-        public ActionResult<Users> GetUser()
+        public ActionResult<Users> GetUserByid()
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
             Users user;
