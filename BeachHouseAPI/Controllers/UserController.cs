@@ -2,13 +2,11 @@
 using BeachHouseAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using System.Web.Http.Cors;
+
 
 namespace BeachHouseAPI.Controllers
 {
@@ -24,12 +22,20 @@ namespace BeachHouseAPI.Controllers
         {
             _context = context;
         }
- 
-        [HttpGet("/users")]
+
+        [HttpGet("/user")]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
-            var test = Url.ActionContext.RouteData.Values["id"];
-            return await _context.Users.ToListAsync();
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+
+            if (ValidateUser(user_id,1))
+            {
+                return await _context.Users.ToListAsync();
+            }
+            else
+            {
+                return Unauthorized("You have no permission to perform this action");
+            }
         }
 
         [HttpPost("/user/sign_in")]
@@ -39,7 +45,7 @@ namespace BeachHouseAPI.Controllers
             string user_id;
             header = Request.Headers.First(header => header.Key == "user_id").Value.FirstOrDefault();
 
-            user_id =header.ToString();
+            user_id = header.ToString();
 
             Users user;
             user = GetUser(user_id);
@@ -62,28 +68,141 @@ namespace BeachHouseAPI.Controllers
             {
                 return Unauthorized();
             }
-            else 
+            else
             {
                 return Ok();
             }
         }
 
-        [HttpGet("/user")]
+        [HttpGet("/user/{id}")] 
         public ActionResult<Users> GetUser()
         {
-            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
-            Users user;
-            user = GetUser(user_id);
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value; 
+            
+            string id = Url.ActionContext.RouteData.Values["id"].ToString();
 
-            return user;
+            if (ValidateUser(user_id, 1))
+            {
+                if (ValidateUser(id, 3))
+                {
+
+                    Users user;
+                    user = GetUser(id);
+
+                    if (ValidateUser(user.Id, 3))
+                    {
+                        return user;
+                    }
+                    else
+                    {
+                        return NotFound("User not exist");
+                    }
+                }
+                else
+                {
+                    return NotFound("User not exist");
+                }
+            }
+            else
+            {
+                return Unauthorized("You have no permission to perform this action");
+            }
+
         }
 
-            private Users GetUser(string id)
+
+        //**
+
+        [HttpPut("/user")]
+        public async Task<ActionResult> UpdateUser([FromBody] UserEditDTO value)
+        {
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+
+            if (ValidateUser(user_id,1))
+            {
+                Users user;
+                user = GetUser(value.Id);
+
+                if (user_id != value.Id)
+                {
+                    if (ValidateUser(user_id, 2)!=true)
+                    {
+                        return Unauthorized("You have no permission to perform this action");
+                    }
+                }
+
+                if (user != null)
+
+                    if (ValidateUser(user.Id, 3))
+                    {
+                        user.Role = value.Role;
+                        user.Active = value.Active;
+                        user.Email = value.Email;
+                        user.FirstName = value.FirstName;
+                        user.LastName = value.LastName;
+                        user.Phone = value.Phone;
+                        await _context.SaveChangesAsync();
+                        return Ok();
+                    }
+                    else
+                    {
+                        return NotFound("User not exist");
+                    }
+                else
+                {
+                    return NotFound("User not exist");
+                }
+            }
+            else
+            {
+                return Unauthorized("You have no permission to perform this action");
+            }
+
+        }
+            //**
+
+        private Users GetUser(string id)
         {
             Users user;
             user = _context.Users.FirstOrDefault(e => e.Id == id);
 
             return user;
+        }
+
+        private bool ValidateUser(string id,int tvalid)
+        {
+            Users user;
+            user = GetUser(id);
+
+
+            if (id!=null  && user != null)
+            { 
+            bool flag=false;
+           
+
+            switch (tvalid)
+            {
+                case 1:
+                    if (user.Active == true) 
+                        flag=true;
+                        break;
+                case 2:
+                    if (user.Active == true && user != null && user.Role!=0)
+                        flag=true;
+                        break;
+                case 3:
+                    if (user != null ) //&& user !=null)
+                        flag = true;
+                    break;
+            }
+            
+            return flag;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
     }
