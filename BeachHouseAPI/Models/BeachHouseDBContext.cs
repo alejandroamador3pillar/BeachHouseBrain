@@ -115,6 +115,7 @@ namespace BeachHouseAPI.Models
             modelBuilder.Entity<Reservations>(entity =>
             {
                 entity.Property(e => e.Active).HasColumnName("active");
+                entity.Property(e => e.Notified).HasColumnName("notified");
 
                 entity.Property(e => e.Date)
                     .HasColumnName("date")

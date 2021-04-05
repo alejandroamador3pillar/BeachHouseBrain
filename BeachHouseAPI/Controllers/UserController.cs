@@ -28,6 +28,7 @@ namespace BeachHouseAPI.Controllers
         [HttpGet("/users")]
         public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
         {
+            var test = Url.ActionContext.RouteData.Values["id"];
             return await _context.Users.ToListAsync();
         }
 

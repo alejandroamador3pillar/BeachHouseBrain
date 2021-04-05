@@ -33,7 +33,7 @@ namespace BeachHouseAPI.Controllers
             apiKeySendGridB = ConfigurationManager.AppSettings.Get("SendGridKeyB");
         }
 
-        [HttpGet("/reservation/available_dates")]
+        [HttpPost("/reservation/available_dates")]
         public ActionResult<IEnumerable<AvailableDatesSerializer>> GetAvailableDates([FromBody] AvailableDatesDTO value)
         {
             if (value == null)
@@ -72,7 +72,7 @@ namespace BeachHouseAPI.Controllers
             {
                 return Unauthorized("You have no permission to perform this action");
             }
-            else  if (user.Active == false) 
+            else if (user.Active == false)
             {
                 return Unauthorized("Your user has been deactivated by admin");
             }
@@ -83,8 +83,9 @@ namespace BeachHouseAPI.Controllers
                 res.LocationId = 1;
                 res.UserId = user_id;
                 res.Active = true;
-                _context.Reservations.Add(res);                
-                
+                res.Notified = false;
+                _context.Reservations.Add(res);
+
                 await _context.SaveChangesAsync();
                 if (ValidDates(value.StartDate, value.Nights))
                 {
@@ -125,7 +126,7 @@ namespace BeachHouseAPI.Controllers
             {
                 return Unauthorized("Your user has been deactivated by admin");
             }
-            else if (user.Id != res.UserId && user.Role == 0) 
+            else if (user.Id != res.UserId && user.Role == 0)
             {
                 return Unauthorized("You have no permission to perform this action");
             }
@@ -147,6 +148,28 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
+        [HttpPost("/reservation/reminder")]
+        public ActionResult EmailReminder()
+        {
+            string key = Request.Headers.FirstOrDefault(header => header.Key == "auth").Value;
+            if (key == apiKeySendGridB)
+            {
+                var email_list = GetLastCancellationDayReservations();
+
+                foreach (Reservations res in email_list)
+                {
+                    SendReminderEmail(res);
+                }
+                return Ok();
+            }
+            else
+            {
+                return Unauthorized("You have no permission to perform this action");
+            }
+            
+        }
+
+
         private Users GetUser(string id)
         {
             Users user;
@@ -165,6 +188,18 @@ namespace BeachHouseAPI.Controllers
                     .Where(p => p.Id.ToString() == id).FirstOrDefault();
 
             return res;
+        }
+
+        private IEnumerable<Reservations> GetLastCancellationDayReservations()
+        {
+            var res = _context.Reservations
+                    .Include(p => p.ReservationDetails)
+                    .Include(p => p.User)
+                    .Where(p => p.ReservationDetails.FirstOrDefault().Date.Date == DateTime.Now.AddDays(6).Date)
+                    .Where(p => p.Active == true)
+                    .Where(p => p.Notified == false); 
+
+            return res.ToList();
         }
 
         private bool IsAvailableDate(DateTime date)
@@ -193,7 +228,7 @@ namespace BeachHouseAPI.Controllers
             return valid;
         }
 
-        private void CreateDetailLines(long res_id, DateTime startDate, int nights) 
+        private void CreateDetailLines(long res_id, DateTime startDate, int nights)
         {
 
             ReservationDetails line;
@@ -219,12 +254,12 @@ namespace BeachHouseAPI.Controllers
             return param.Value;
         }
 
-        private string getCheckInCheckOut()
+        private string getCheckInCheckOut(Reservations res)
         {
             Params checkin = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("CheckInParamId"));
             Params checkout = _context.Params.FirstOrDefault(e => e.Id.ToString() == ConfigurationManager.AppSettings.Get("CheckOutParamId"));
 
-            string htmltag = "<BR> Check in: " + checkin.Value + " Check Out: " + checkout.Value + "<BR>";
+            string htmltag = "<BR> Check in: " + res.Date.ToShortDateString() + " "+ checkin.Value + " Check Out: " + res.Date.AddDays(res.ReservationDetails.Count).ToShortDateString() + " " + checkout.Value + "<BR>";
 
             return htmltag;
         }
@@ -236,11 +271,32 @@ namespace BeachHouseAPI.Controllers
             var toAdmin = GetAdminEmailAddress();
 
             var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
-            var htmlContent = "<strong>" + "Reservation " + res.Id + " has been created on: " + res.Date.ToShortDateString() + " <br> nights: " + res.ReservationDetails.Count() + getCheckInCheckOut() + " <br> From:" + res.ReservationDetails.FirstOrDefault().Date.ToShortDateString() + " to: " + res.ReservationDetails.LastOrDefault().Date.ToShortDateString() + " <br> Total: $" + res.ReservationDetails.Sum(x => x.Rate) +
-                              "<br>If required, we'll call you to:" + res.User.Phone + "  <br> <a href = " + getTAndCUrl() + " > Terms And Conditions </ a > </strong>";
+
+             var htmlContent = "<p>Hello <strong> " + res.User.FirstName.Trim() + " " + res.User.LastName.Trim() + "</strong>,</p><p> Thanks for reserving the ASEITHSMUS Bejuco Beach House.This is your reservation summary:<p>" +
+                getCheckInCheckOut(res) + "<br>" + "<strong> Total Nights:</strong> " + res.ReservationDetails.Count() + " <strong> Total Charge:</strong> $" + res.ReservationDetails.Sum(x => x.Rate) +" (USD) <br/> " +
+                "<a href = " + getTAndCUrl() + "> Terms and Conditions</a></p><p> Please remember that cancellations are allowed until one week before the Check In date, right after that date no cancellations can be made.</p> " +
+                "<p> Bejuco Beach House Google Maps link <a href =" + getTAndCUrl() + "> here </a></p><p> Regards,<br/><strong> Bejuco Beach House Administration Team</strong></p>";
 
             var emailToUser = SendEmailAsync(subject, to, plainTextContent, htmlContent);
             var emailToAdmin = SendEmailAsync(subject, toAdmin, plainTextContent, htmlContent);
+        }
+
+        private void SendReminderEmail(Reservations res)
+        {
+            var subject = " Reminder of your upcoming reservation. ID:" + res.Id + ".";
+            var to = new EmailAddress(res.User.Email.Trim(), res.User.FirstName.Trim() + " " + res.User.LastName.Trim());
+
+            var plainTextContent = "Reservation ID:" + res.Id + " date: " + res.Date.ToShortDateString() + " nights: " + res.ReservationDetails.Count();
+            var htmlContent = "<p> Hello <strong> " + res.User.FirstName.Trim() + " " + res.User.LastName.Trim() + "/ <strong>,</p><br> <p> This is a friendly reminder of your upcoming reservation.</p>" +
+                getCheckInCheckOut(res) + "<br> Total Nights:</strong> " + res.ReservationDetails.Count() + "<strong> Total Charge: </strong> $" + res.ReservationDetails.Sum(x => x.Rate) + " (USD) <br/></p><p><a href =" + getTAndCUrl() + "> Terms and Conditions</a></p> " +
+                "<p> If you want to cancel the reservation please click <a href= " + getTAndCUrl() + "> here </a> to be redirected to the system for cancellation." +
+                "<p> Bejuco Beach House Google Maps link <a href=" + getTAndCUrl() + " > here </a></p>" +
+                "<p> Regards,<br/><strong> Bejuco Beach House Administration Team </strong></p> ";
+
+            var emailToUser = SendEmailAsync(subject, to, plainTextContent, htmlContent);
+            res.Notified = true;
+            _context.SaveChanges();
+
         }
 
         private void SendCancelEmail(Reservations res)
