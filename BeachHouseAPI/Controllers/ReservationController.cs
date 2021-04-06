@@ -78,28 +78,37 @@ namespace BeachHouseAPI.Controllers
             }
             else
             {
-                res = new Reservations();
-                res.Date = DateTime.UtcNow;
-                res.LocationId = 1;
-                res.UserId = user_id;
-                res.Active = true;
-                res.Notified = false;
-                _context.Reservations.Add(res);
-
-                await _context.SaveChangesAsync();
-                if (ValidDates(value.StartDate, value.Nights))
+                if (value.Nights > 6)
                 {
-                    CreateDetailLines(res.Id, value.StartDate, value.Nights);
-                    await _context.SaveChangesAsync();
-                    SendReservationEmail(res);
-                    return Ok();
+                    return BadRequest("Reservations longer than 6 days are not allowed");
                 }
                 else
                 {
-                    _context.Remove(res);
+                    res = new Reservations();
+                    res.Date = DateTime.UtcNow;
+                    res.LocationId = 1;
+                    res.UserId = user_id;
+                    res.Active = true;
+                    res.Notified = false;
+                    _context.Reservations.Add(res);
+
                     await _context.SaveChangesAsync();
-                    return BadRequest("Date range was invalid at the moment of creation. Check your dates.");
+                    if (ValidDates(value.StartDate, value.Nights))
+                    {
+                        CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                        await _context.SaveChangesAsync();
+                        SendReservationEmail(res);
+                        return Ok();
+                    }
+                    else
+                    {
+                        _context.Remove(res);
+                        await _context.SaveChangesAsync();
+                        return BadRequest("Date range was invalid at the moment of creation. Check your dates.");
+                    }
                 }
+
+               
             }
         }
 
