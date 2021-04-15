@@ -174,36 +174,28 @@ namespace BeachHouseAPI.Controllers
             Users user;
             user = GetUser(id);
 
-
             if (id!=null  && user != null)
             { 
-            bool flag=false;
-           
-
-            switch (tvalid)
-            {
-                case 1:
-                    if (user.Active == true) 
-                        flag=true;
-                        break;
-                case 2:
-                    if (user.Active == true && user != null && user.Role!=0)
-                        flag=true;
-                        break;
-                case 3:
-                    if (user != null ) //&& user !=null)
-                        flag = true;
-                    break;
-            }
-            
-            return flag;
+                bool flag=false;
+          
+                switch (tvalid)
+                {
+                    case 1:
+                        if (user.Active == true) 
+                            flag=true; break;
+                    case 2:
+                        if (user.Active == true  && user.Role!=0)
+                            flag=true; break;
+                    case 3:
+                        if (user != null )
+                            flag = true; break;
+                }
+                return flag;
             }
             else
             {
                 return false;
             }
-
         }
-
     }
 }

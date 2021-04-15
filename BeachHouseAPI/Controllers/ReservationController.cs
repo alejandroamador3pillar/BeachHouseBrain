@@ -72,32 +72,42 @@ namespace BeachHouseAPI.Controllers
             {
                 return Unauthorized("You have no permission to perform this action");
             }
-            else  if (user.Active == false) 
+            else if (user.Active == false)
             {
                 return Unauthorized("Your user has been deactivated by admin");
             }
             else
             {
-                res = new Reservations();
-                res.Date = DateTime.UtcNow;
-                res.LocationId = 1;
-                res.UserId = user_id;
-                res.Active = true;
-                _context.Reservations.Add(res);                
-                
-                await _context.SaveChangesAsync();
-                if (ValidDates(value.StartDate, value.Nights))
-                {
-                    CreateDetailLines(res.Id, value.StartDate, value.Nights);
+
+                if  (((user.Id == value.CreatedBy) ||  (user.Id != value.CreatedBy) && (user.Role==1)))
+                { 
+
+                    res = new Reservations();
+                    res.Date = DateTime.UtcNow;
+                    res.LocationId = 1;
+                    res.UserId = value.CreatedBy;
+                    res.Active = true;
+                    res.CreatedBy = user.Id;
+                    _context.Reservations.Add(res);
+
                     await _context.SaveChangesAsync();
-                    SendReservationEmail(res);
-                    return Ok();
+                    if (ValidDates(value.StartDate, value.Nights))
+                    {
+                        CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                        await _context.SaveChangesAsync();
+                        SendReservationEmail(res);
+                        return Ok();
+                    }
+                    else
+                    {
+                        _context.Remove(res);
+                        await _context.SaveChangesAsync();
+                        return BadRequest("Date range was invalid at the moment of creation. Check your dates.");
+                    }
                 }
                 else
                 {
-                    _context.Remove(res);
-                    await _context.SaveChangesAsync();
-                    return BadRequest("Date range was invalid at the moment of creation. Check your dates.");
+                    return Unauthorized("You have no permission to perform this action");
                 }
             }
         }
@@ -139,7 +149,7 @@ namespace BeachHouseAPI.Controllers
                 {
                     _context.Remove(det);
                 }
-
+                res.CreatedBy = user.Id;
                 res.Active = false;
                 await _context.SaveChangesAsync();
                 SendCancelEmail(res);
