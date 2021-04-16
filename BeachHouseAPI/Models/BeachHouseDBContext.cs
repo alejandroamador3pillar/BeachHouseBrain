@@ -129,6 +129,14 @@ namespace BeachHouseAPI.Models
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("created_by")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+
+
                 entity.HasOne(d => d.Location)
                     .WithMany(p => p.Reservations)
                     .HasForeignKey(d => d.LocationId)

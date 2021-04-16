@@ -15,7 +15,9 @@ namespace BeachHouseAPI.Models
         public string UserId { get; set; }
         public long LocationId { get; set; }
         public bool Active { get; set; }
+        public string CreatedBy { get; set; }
         public bool Notified { get; set; }
+
 
         public virtual Locations Location { get; set; }
         public virtual Users User { get; set; }

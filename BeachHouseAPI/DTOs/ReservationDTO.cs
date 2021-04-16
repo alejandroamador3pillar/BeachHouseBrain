@@ -9,7 +9,10 @@ namespace BeachHouseAPI.DTOs
     {
         public DateTime StartDate { get; set; }
         public int LocationId { get; set; }
-        public int Nights { get; set; } 
+        public int Nights { get; set; }
+        public string CreatedBy { get; set; }
+        
+
 
     }
 }

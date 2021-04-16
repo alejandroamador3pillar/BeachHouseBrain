@@ -149,7 +149,7 @@ namespace BeachHouseAPI.Controllers
                 {
                     _context.Remove(det);
                 }
-
+                res.CreatedBy = user.Id;
                 res.Active = false;
                 await _context.SaveChangesAsync();
                 SendCancelEmail(res);
