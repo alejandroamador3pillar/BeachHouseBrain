@@ -79,9 +79,8 @@ namespace BeachHouseAPI.Controllers
             else
             {
 
-                if  (((user.Id == value.CreatedBy) ||  (user.Id != value.CreatedBy) && (user.Role==1)))
+                if  ((user.Id == value.CreatedBy) ||  ((user.Id != value.CreatedBy) && (user.Role==1)))
                 { 
-
                     res = new Reservations();
                     res.Date = DateTime.UtcNow;
                     res.LocationId = 1;
