@@ -20,6 +20,7 @@ namespace BeachHouseAPI.Models
         public virtual DbSet<Params> Params { get; set; }
         public virtual DbSet<ReservationDetails> ReservationDetails { get; set; }
         public virtual DbSet<Reservations> Reservations { get; set; }
+        public virtual DbSet<ReservationLog> ReservationLog { get; set; }
         public virtual DbSet<Users> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -129,14 +130,6 @@ namespace BeachHouseAPI.Models
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UserId)
-                    .IsRequired()
-                    .HasColumnName("created_by")
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
-
-
-
                 entity.HasOne(d => d.Location)
                     .WithMany(p => p.Reservations)
                     .HasForeignKey(d => d.LocationId)
@@ -149,6 +142,41 @@ namespace BeachHouseAPI.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Users_ToReservation");
             });
+
+            modelBuilder.Entity<ReservationLog>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Date)
+                    .HasColumnName("date")
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.Operation)
+                    .HasColumnName("operation")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ReservationId).HasColumnName("reservation_id");
+
+                entity.Property(e => e.UserId)
+                    .IsRequired()
+                    .HasColumnName("user_id")
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.HasOne(d => d.Reservation)
+                    .WithMany(p => p.ReservationLog)
+                    .HasForeignKey(d => d.ReservationId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Log_ToReservation");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.ReservationLog)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_User_ToReservationLog");
+            });
+
 
             modelBuilder.Entity<Users>(entity =>
             {

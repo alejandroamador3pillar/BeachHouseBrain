@@ -8,6 +8,7 @@ namespace BeachHouseAPI.Models
         public Reservations()
         {
             ReservationDetails = new HashSet<ReservationDetails>();
+            ReservationLog = new HashSet<ReservationLog>();
         }
 
         public long Id { get; set; }
@@ -15,12 +16,11 @@ namespace BeachHouseAPI.Models
         public string UserId { get; set; }
         public long LocationId { get; set; }
         public bool Active { get; set; }
-        public string CreatedBy { get; set; }
-        public bool Notified { get; set; }
-
+        public bool? Notified { get; set; }
 
         public virtual Locations Location { get; set; }
         public virtual Users User { get; set; }
         public virtual ICollection<ReservationDetails> ReservationDetails { get; set; }
+        public virtual ICollection<ReservationLog> ReservationLog { get; set; }
     }
 }

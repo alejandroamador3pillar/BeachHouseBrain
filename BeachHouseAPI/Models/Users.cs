@@ -8,6 +8,7 @@ namespace BeachHouseAPI.Models
         public Users()
         {
             Params = new HashSet<Params>();
+            ReservationLog = new HashSet<ReservationLog>();
             Reservations = new HashSet<Reservations>();
         }
 
@@ -20,6 +21,7 @@ namespace BeachHouseAPI.Models
         public int? Phone { get; set; }
 
         public virtual ICollection<Params> Params { get; set; }
+        public virtual ICollection<ReservationLog> ReservationLog { get; set; }
         public virtual ICollection<Reservations> Reservations { get; set; }
     }
 }
