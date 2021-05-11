@@ -13,13 +13,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BeachHouseAPI.Repositories;
 
 namespace BeachHouseAPI
 {
     public class Startup
     {
-        //private const string ConnectionString = "Server=CRH-LAP-106\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;";
-        private const string ConnectionString = "Server=tcp:beachhouse-test.database.windows.net,1433;Initial Catalog=beachhouse;Persist Security Info=False;User ID=beachhouseadmin;Password=Mjcg7982;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+        private const string ConnectionString = "Server=CRS-LAP-006\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;";
+        //private const string ConnectionString = "Server=tcp:beachhouse-test.database.windows.net,1433;Initial Catalog=beachhouse;Persist Security Info=False;User ID=beachhouseadmin;Password=Mjcg7982;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
         public Startup(IConfiguration configuration)
         {
@@ -33,11 +34,17 @@ namespace BeachHouseAPI
         {
 
             services.AddControllers();
+            services.AddScoped<IParamRepository, ParamRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddDbContext<Models.BeachHouseDBContext>(options => options.UseSqlServer(ConnectionString));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BeachHouseAPI", Version = "v1" });
             });
+
+
+            
             services.AddCors(options => options.AddPolicy("Cors",
                 builder =>
                 {

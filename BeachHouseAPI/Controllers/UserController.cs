@@ -1,5 +1,7 @@
-﻿using BeachHouseAPI.DTOs;
+﻿using AutoMapper;
+using BeachHouseAPI.DTOs;
 using BeachHouseAPI.Models;
+using BeachHouseAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -14,23 +16,29 @@ namespace BeachHouseAPI.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly BeachHouseDBContext _context;
+        private readonly IUserRepository _repository;
 
         public object Summaries { get; private set; }
 
-        public UserController(BeachHouseDBContext context)
+        public UserController(IUserRepository repository)
         {
-            _context = context;
+            _repository = repository;
+            
         }
 
         [HttpGet("/user")]
-        public async Task<ActionResult<IEnumerable<Users>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserEditDTO>>> GetUsers()
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            if (ValidateUser(user_id,1))
+            var valid = _repository.ValidateUser(user_id);
+            
+            
+            if (valid == 200)
             {
-                return await _context.Users.ToListAsync();
+                var l =await _repository.GetUsers(user_id);
+                
+                return Ok(l.ToList());
             }
             else
             {
@@ -47,30 +55,15 @@ namespace BeachHouseAPI.Controllers
 
             user_id = header.ToString();
 
-            Users user;
-            user = GetUser(user_id);
+            var resul = await _repository.SignIn(user_id, value);
 
-            if (user == null)
+            if(resul == 200)
             {
-                user = new Users();
-                user.Id = user_id;
-                user.Role = 0;
-                user.Active = true;
-                user.Email = value.Email;
-                user.FirstName = value.FirstName;
-                user.LastName = value.LastName;
-                user.Phone = value.Phone;
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
                 return Ok();
-            }
-            else if (user.Active == false)
-            {
-                return Unauthorized();
             }
             else
             {
-                return Ok();
+                return Unauthorized();
             }
         }
 
@@ -81,31 +74,18 @@ namespace BeachHouseAPI.Controllers
             
             string id = Url.ActionContext.RouteData.Values["id"].ToString();
 
-            if (ValidateUser(user_id, 1))
+            var valid = _repository.ValidateUser2(user_id, id);
+
+            if(valid == 200)
             {
-                if (ValidateUser(id, 3))
-                {
-
-                    Users user;
-                    user = GetUser(id);
-
-                    if (ValidateUser(user.Id, 3))
-                    {
-                        return user;
-                    }
-                    else
-                    {
-                        return NotFound("User not exist");
-                    }
-                }
-                else
-                {
-                    return NotFound("User not exist");
-                }
+                return Ok(_repository.GetUser(id));
+            }else if(valid == 401)
+            {
+                return Unauthorized("You have no permission to perform this action");
             }
             else
             {
-                return Unauthorized("You have no permission to perform this action");
+                return NotFound("User not exist");
             }
 
         }
@@ -118,84 +98,23 @@ namespace BeachHouseAPI.Controllers
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            if (ValidateUser(user_id,1))
+            var resul = await _repository.UpdateUser(user_id,value);
+
+            if(resul == 200)
             {
-                Users user;
-                user = GetUser(value.Id);
-
-                if (user_id != value.Id)
-                {
-                    if (ValidateUser(user_id, 2)!=true)
-                    {
-                        return Unauthorized("You have no permission to perform this action");
-                    }
-                }
-
-                if (user != null)
-
-                    if (ValidateUser(user.Id, 3))
-                    {
-                        user.Role = value.Role;
-                        user.Active = value.Active;
-                        user.Email = value.Email;
-                        user.FirstName = value.FirstName;
-                        user.LastName = value.LastName;
-                        user.Phone = value.Phone;
-                        await _context.SaveChangesAsync();
-                        return Ok();
-                    }
-                    else
-                    {
-                        return NotFound("User not exist");
-                    }
-                else
-                {
-                    return NotFound("User not exist");
-                }
+                return Ok();
+            }else if(resul == 401)
+            {
+                return Unauthorized("You have no permission to perform this action");
             }
             else
             {
-                return Unauthorized("You have no permission to perform this action");
+                return NotFound("User not exist");
             }
 
         }
             //**
 
-        private Users GetUser(string id)
-        {
-            Users user;
-            user = _context.Users.FirstOrDefault(e => e.Id == id);
-
-            return user;
-        }
-
-        private bool ValidateUser(string id,int tvalid)
-        {
-            Users user;
-            user = GetUser(id);
-
-            if (id!=null  && user != null)
-            { 
-                bool flag=false;
-          
-                switch (tvalid)
-                {
-                    case 1:
-                        if (user.Active == true) 
-                            flag=true; break;
-                    case 2:
-                        if (user.Active == true  && user.Role!=0)
-                            flag=true; break;
-                    case 3:
-                        if (user != null )
-                            flag = true; break;
-                }
-                return flag;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        
     }
 }
