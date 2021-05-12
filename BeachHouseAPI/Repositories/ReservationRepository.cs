@@ -70,8 +70,8 @@ namespace BeachHouseAPI.Repositories
                 }
                 else
                 {
-                    var diff = DaysLeft(requestor);
-                    if ( diff == 0) {
+                   var diff = DaysLeft(requestor);
+                    if ( diff == -1) {
                         res = new Reservations();
                         res.Date = DateTime.UtcNow;
                         res.LocationId = 1;
@@ -532,15 +532,19 @@ namespace BeachHouseAPI.Repositories
 
             if (r != null)
             {
-                var diff = Math.Abs((r.Date - today.Date).Days);
+                TimeSpan dif = (today - r.Date);
+                var diff = dif.Days;
                 if (diff < days)
                 {
-                    return days-diff;
+                    Console.WriteLine(r.Date);
+                    Console.WriteLine(today);
+                    Console.WriteLine(diff);
+                    return (int)(today -r.Date).Days;
                 }
 
             }
 
-            return 0;
+            return -1;
         }
     }
 }

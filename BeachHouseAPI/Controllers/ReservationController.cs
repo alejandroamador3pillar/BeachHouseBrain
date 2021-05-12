@@ -30,6 +30,14 @@ namespace BeachHouseAPI.Controllers
             _repository = repository;
         }
 
+        [HttpGet("/reservation/test")]
+        public IActionResult Test()
+        {
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+            string requestor = Request.Headers.FirstOrDefault(header => header.Key == "requestor").Value;
+
+            return Ok(_repository.DaysLeft(requestor));
+        }
 
         [HttpPost("/reservation/available_dates")]
         public ActionResult<IEnumerable<AvailableDatesSerializer>> GetAvailableDates([FromBody] AvailableDatesDTO value)
