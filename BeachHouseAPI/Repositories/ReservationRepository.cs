@@ -70,30 +70,39 @@ namespace BeachHouseAPI.Repositories
                 }
                 else
                 {
-                    res = new Reservations();
-                    res.Date = DateTime.UtcNow;
-                    res.LocationId = 1;
-                    res.UserId = user.Id;
-                    res.Active = true;
-                    res.Notified = false;
-                    res.User = user;
-                    _context.Reservations.Add(res);
+                    var diff = DaysLeft(requestor);
+                    if ( diff == 0) {
+                        res = new Reservations();
+                        res.Date = DateTime.UtcNow;
+                        res.LocationId = 1;
+                        res.UserId = user.Id;
+                        res.Active = true;
+                        res.Notified = false;
+                        res.User = user;
+                        _context.Reservations.Add(res);
 
-                    await _context.SaveChangesAsync();
-                    if (ValidDates(value.StartDate, value.Nights))
-                    {
-                        CreateDetailLines(res.Id, value.StartDate, value.Nights);
                         await _context.SaveChangesAsync();
-                        //await CreateAuditRecord(res.Id, req.Id, "Reserve");
-                        SendReservationEmail(res);
-                        return 200;
+                        if (ValidDates(value.StartDate, value.Nights))
+                        {
+                            CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                            await _context.SaveChangesAsync();
+                            //await CreateAuditRecord(res.Id, req.Id, "Reserve");
+                            SendReservationEmail(res);
+                            return 200;
+                        }
+                        else
+                        {
+                            _context.Remove(res);
+                            await _context.SaveChangesAsync();
+                            return 5001;
+                        }
                     }
                     else
                     {
-                        _context.Remove(res);
-                        await _context.SaveChangesAsync();
-                        return 5011;
+                        return diff;
                     }
+
+                    
                 }
 
 
@@ -512,6 +521,26 @@ namespace BeachHouseAPI.Repositories
             log.Date = DateTime.Now;
             _context.ReservationLog.Add(log);
             await _context.SaveChangesAsync();
+        }
+
+        public int DaysLeft(string requestor)
+        {
+            var days = Convert.ToInt16(_context.Params.FirstOrDefault(r => r.Id == 5).Value);
+            var today = DateTime.Now;
+            var r = _context.Reservations.Where(r => (r.UserId == requestor)).OrderByDescending(r => r.Date).FirstOrDefault();
+
+
+            if (r != null)
+            {
+                var diff = Math.Abs((r.Date - today.Date).Days);
+                if (diff < days)
+                {
+                    return days-diff;
+                }
+
+            }
+
+            return 0;
         }
     }
 }

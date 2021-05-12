@@ -25,10 +25,11 @@ namespace BeachHouseAPI.Controllers
 
         public object Summaries { get; private set; }
 
-        public ReservationController(BeachHouseDBContext context, IReservationRepository repository)
+        public ReservationController(IReservationRepository repository)
         {
             _repository = repository;
         }
+
 
         [HttpPost("/reservation/available_dates")]
         public ActionResult<IEnumerable<AvailableDatesSerializer>> GetAvailableDates([FromBody] AvailableDatesDTO value)
@@ -67,9 +68,13 @@ namespace BeachHouseAPI.Controllers
             {
                 return BadRequest("Reservations longer than 6 days are not allowed");
             }
-            else
+            else if(resul == 5001)
             {
                 return BadRequest("Date range was invalid at the moment of creation. Check your dates.");
+            }
+            else
+            {
+                return BadRequest("You must wait "+ resul +" days before making another reservation");
             }
         }
 

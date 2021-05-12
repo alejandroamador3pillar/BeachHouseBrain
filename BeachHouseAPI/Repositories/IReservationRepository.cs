@@ -18,6 +18,7 @@ namespace BeachHouseAPI.Repositories
         int ValidateUserReservation(string user_id, string requestor, string mode);
         IEnumerable<ReservationsReportDTO> ReservationsReport(string user_id, string startDate, string endDate, string mode);
         IEnumerable<ReservationsReportDTO> UserReservations(string user_id, string requestor, string mode);
+        int DaysLeft(string requestor);
 
     }
 }
