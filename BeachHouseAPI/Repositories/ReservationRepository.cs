@@ -539,7 +539,7 @@ namespace BeachHouseAPI.Repositories
                     Console.WriteLine(r.Date);
                     Console.WriteLine(today);
                     Console.WriteLine(diff);
-                    return (int)(today -r.Date).Days;
+                    return 60-((int)(today -r.Date).Days);
                 }
 
             }
