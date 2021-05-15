@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using BeachHouseAPI.DTOs;
 
 using System.Web.Http.Cors;
+using BeachHouseAPI.Repositories;
 
 namespace BeachHouseAPI.Controllers
 {
@@ -16,19 +17,18 @@ namespace BeachHouseAPI.Controllers
     [Route("[controller]")]
     public class ParamController : ControllerBase
     {
-        private readonly BeachHouseDBContext _context;
-
+        private readonly IParamRepository _repository;
         public object Summaries { get; private set; }
 
-        public ParamController(BeachHouseDBContext context)
+        public ParamController(IParamRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet("/params")]
-        public async Task<ActionResult<IEnumerable<Params>>> GetParams()
+        public IActionResult GetParams()
         {
-            return await _context.Params.ToListAsync();
+            return Ok(this._repository.GetParams());
         }
 
         [HttpPut("/params")]
@@ -36,59 +36,23 @@ namespace BeachHouseAPI.Controllers
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            Users user;
-            user = GetUser(user_id);
+            var valid = _repository.ValidateParam(user_id,value);
 
-            if (user == null)
+            if (valid == 200)
+            {
+                await _repository.UpdateParam(user_id, value);
+                return Ok();
+                
+            }else if (valid == 401)
             {
                 return Unauthorized();
             }
             else
             {
-                Params param;
-                param = GetParam(value.Id);
-
-                if (param == null)
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    if (user.Active == true && user.Role == 1) //Role 1 = Admin
-                    {
-                        param.Value = value.Value;
-                        param.Description = value.Description;
-                        param.StartDate = value.StartDate;
-                        param.EndDate = value.EndDate;
-                        param.LastModified = DateTime.UtcNow;
-                        param.UpdatedBy = user.Id;
-                        await _context.SaveChangesAsync();
-                        return Ok();
-                    }
-                    else
-                    {
-                        return Unauthorized();
-                    }
-                }
+                
+                return NotFound();
             }
         }
-
-        private Params GetParam(long id)
-        {
-            Params param;
-            param = _context.Params.FirstOrDefault(e => e.Id == id);
-
-            return param;
-        }
-
-        private Users GetUser(string id)
-        {
-            Users user;
-            user = _context.Users.FirstOrDefault(e => e.Id == id);
-
-            return user;
-        }
-
 
     }
 }
