@@ -22,6 +22,7 @@ namespace BeachHouseAPI.Models
         public virtual DbSet<Reservations> Reservations { get; set; }
         public virtual DbSet<ReservationLog> ReservationLog { get; set; }
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<Seasons> Seasons { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

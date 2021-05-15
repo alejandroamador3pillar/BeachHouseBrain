@@ -67,11 +67,11 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
-        [HttpGet("/user/{id}")] 
+        [HttpGet("/user/{id}")]
         public ActionResult<Users> GetUser()
         {
-            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value; 
-            
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+
             string id = Url.ActionContext.RouteData.Values["id"].ToString();
 
             var valid = _repository.ValidateUser2(user_id, id);
@@ -97,7 +97,6 @@ namespace BeachHouseAPI.Controllers
         public async Task<ActionResult> UpdateUser([FromBody] UserEditDTO value)
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
-
             var resul = await _repository.UpdateUser(user_id,value);
 
             if(resul == 200)
@@ -113,8 +112,6 @@ namespace BeachHouseAPI.Controllers
             }
 
         }
-            //**
-
-        
+        //**
     }
 }

@@ -19,6 +19,7 @@ namespace BeachHouseAPI
 {
     public class Startup
     {
+        //private const string ConnectionString = "Server=CRS-LAP-030;Database=BeachHouse;Trusted_Connection=True;";
         private const string ConnectionString = "Server=CRS-LAP-006\\SQLEXPRESS;Database=BeachHouseDB;Trusted_Connection=True;";
         //private const string ConnectionString = "Server=tcp:beachhouse-test.database.windows.net,1433;Initial Catalog=beachhouse;Persist Security Info=False;User ID=beachhouseadmin;Password=Mjcg7982;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 
