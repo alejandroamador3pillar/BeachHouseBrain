@@ -11,6 +11,7 @@ namespace BeachHouseAPI.Repositories
     public interface IReservationRepository
     {
         IEnumerable<AvailableDatesSerializer> GetAvailableDates(AvailableDatesDTO value);
+        IEnumerable<AvailableDatesSerializer> GetDates(AvailableDatesDTO value);
         Task<int> Reserve(string user_id, string requestor, ReservationDTO value);
         Task<int> Cancel(string user_id, string res_id);
         int EmailReminder(string key);

@@ -26,6 +26,28 @@ namespace BeachHouseAPI.Repositories
             apiKeySendGridB = ConfigurationManager.AppSettings.Get("SendGridKeyB");
         }
 
+        public IEnumerable<AvailableDatesSerializer> GetDates(AvailableDatesDTO value)
+        {
+            var dates = new List<AvailableDatesSerializer>();
+
+            // Loop from the first day of the month until we hit the next month, moving forward a day at a time
+            for (var date = new DateTime(value.Year, value.Month, 1); date.Month == value.Month; date = date.AddDays(1))
+            {
+                var rDate = new AvailableDatesSerializer
+                {
+                    Date = date,
+                    Available = IsAvailableDate(date),
+                    Rate = 500
+                };
+                if (!rDate.Available)
+                {
+                    dates.Add(rDate);
+                }
+                
+            }
+            return dates;
+        }
+
         public IEnumerable<AvailableDatesSerializer> GetAvailableDates(AvailableDatesDTO value)
         {
             var dates = new List<AvailableDatesSerializer>();
