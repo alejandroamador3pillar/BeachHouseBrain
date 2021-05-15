@@ -28,7 +28,7 @@ namespace BeachHouseAPI.Controllers
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            if (ValidateUser(user_id,1))
+            if (ValidateUser(user_id, 1))
             {
                 return await _context.Users.ToListAsync();
             }
@@ -74,11 +74,11 @@ namespace BeachHouseAPI.Controllers
             }
         }
 
-        [HttpGet("/user/{id}")] 
+        [HttpGet("/user/{id}")]
         public ActionResult<Users> GetUser()
         {
-            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value; 
-            
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+
             string id = Url.ActionContext.RouteData.Values["id"].ToString();
 
             if (ValidateUser(user_id, 1))
@@ -118,14 +118,14 @@ namespace BeachHouseAPI.Controllers
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            if (ValidateUser(user_id,1))
+            if (ValidateUser(user_id, 1))
             {
                 Users user;
                 user = GetUser(value.Id);
 
                 if (user_id != value.Id)
                 {
-                    if (ValidateUser(user_id, 2)!=true)
+                    if (ValidateUser(user_id, 2) != true)
                     {
                         return Unauthorized("You have no permission to perform this action");
                     }
@@ -159,7 +159,7 @@ namespace BeachHouseAPI.Controllers
             }
 
         }
-            //**
+        //**
 
         private Users GetUser(string id)
         {
@@ -169,25 +169,25 @@ namespace BeachHouseAPI.Controllers
             return user;
         }
 
-        private bool ValidateUser(string id,int tvalid)
+        private bool ValidateUser(string id, int tvalid)
         {
             Users user;
             user = GetUser(id);
 
-            if (id!=null  && user != null)
-            { 
-                bool flag=false;
-          
+            if (id != null && user != null)
+            {
+                bool flag = false;
+
                 switch (tvalid)
                 {
                     case 1:
-                        if (user.Active == true) 
-                            flag=true; break;
+                        if (user.Active == true)
+                            flag = true; break;
                     case 2:
-                        if (user.Active == true  && user.Role!=0)
-                            flag=true; break;
+                        if (user.Active == true && user.Role != 0)
+                            flag = true; break;
                     case 3:
-                        if (user != null )
+                        if (user != null)
                             flag = true; break;
                 }
                 return flag;
