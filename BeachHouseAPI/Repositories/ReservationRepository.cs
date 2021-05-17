@@ -92,8 +92,10 @@ namespace BeachHouseAPI.Repositories
                 }
                 else
                 {
-                   var diff = DaysLeft(requestor);
-                    if ( diff == -1) {
+                    Console.WriteLine(requestor);
+                    //Admin can reserve no matter what
+                    if (ValidateUser(requestor, 2))
+                    {
                         res = new Reservations();
                         res.Date = DateTime.UtcNow;
                         res.LocationId = 1;
@@ -102,7 +104,6 @@ namespace BeachHouseAPI.Repositories
                         res.Notified = false;
                         res.User = user;
                         _context.Reservations.Add(res);
-
                         await _context.SaveChangesAsync();
                         if (ValidDates(value.StartDate, value.Nights))
                         {
@@ -118,10 +119,44 @@ namespace BeachHouseAPI.Repositories
                             await _context.SaveChangesAsync();
                             return 5001;
                         }
+
                     }
                     else
                     {
-                        return diff;
+                        //Non admin users have days restrictions before making another reservation
+                        var diff = DaysLeft(requestor);
+                        if (diff == -1)
+                        {
+                            res = new Reservations();
+                            res.Date = DateTime.UtcNow;
+                            res.LocationId = 1;
+                            res.UserId = user.Id;
+                            res.Active = true;
+                            res.Notified = false;
+                            res.User = user;
+                            _context.Reservations.Add(res);
+
+                            await _context.SaveChangesAsync();
+                            if (ValidDates(value.StartDate, value.Nights))
+                            {
+                                CreateDetailLines(res.Id, value.StartDate, value.Nights);
+                                await _context.SaveChangesAsync();
+                                //await CreateAuditRecord(res.Id, req.Id, "Reserve");
+                                SendReservationEmail(res);
+                                return 200;
+                            }
+                            else
+                            {
+                                _context.Remove(res);
+                                await _context.SaveChangesAsync();
+                                return 5001;
+                            }
+                        }
+                        else
+                        {
+                            return diff;
+                        }
+
                     }
 
                     
