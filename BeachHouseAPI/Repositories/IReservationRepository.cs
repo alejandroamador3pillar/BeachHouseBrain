@@ -20,6 +20,7 @@ namespace BeachHouseAPI.Repositories
         IEnumerable<ReservationsReportDTO> ReservationsReport(string user_id, string startDate, string endDate, string mode);
         IEnumerable<ReservationsReportDTO> UserReservations(string user_id, string requestor, string mode);
         int DaysLeft(string requestor);
+        int GetPrice(DateTime datetime, int num_days);
 
     }
 }
