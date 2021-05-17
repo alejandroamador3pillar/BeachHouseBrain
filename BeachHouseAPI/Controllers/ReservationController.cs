@@ -22,12 +22,14 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly IReservationRepository _repository;
+        private readonly BeachHouseDBContext _context;
 
         public object Summaries { get; private set; }
 
-        public ReservationController(IReservationRepository repository)
+        public ReservationController(IReservationRepository repository, BeachHouseDBContext context)
         {
             _repository = repository;
+            _context = context;
         }
 
 
