@@ -29,7 +29,6 @@ namespace BeachHouseAPI.Controllers
         public ReservationController(IReservationRepository repository, BeachHouseDBContext context)
         {
             _repository = repository;
-            _context = context;
         }
 
 
