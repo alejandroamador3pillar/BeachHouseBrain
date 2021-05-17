@@ -38,6 +38,7 @@ namespace BeachHouseAPI
             services.AddScoped<IParamRepository, ParamRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ISeasonsRepository, SeasonsRepository>();
             services.AddDbContext<Models.BeachHouseDBContext>(options => options.UseSqlServer(ConnectionString));
             services.AddSwaggerGen(c =>
             {

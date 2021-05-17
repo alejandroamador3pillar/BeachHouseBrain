@@ -81,6 +81,12 @@ namespace BeachHouseAPI.Repositories
             }
         }
 
+        public bool isAdmin(string user_id)
+        {
+            return ValidateUser(user_id, 2);
+             
+        }
+
         public int ValidateUser2(string user_id, string id)
         {
             if (ValidateUser(user_id, 1))

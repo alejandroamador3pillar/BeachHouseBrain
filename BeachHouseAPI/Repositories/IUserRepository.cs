@@ -15,5 +15,6 @@ namespace BeachHouseAPI.Repositories
         int ValidateUser2(string user_id, string id);
         Users GetUser(string id);
         Task<int> UpdateUser(string user_id, UserEditDTO value);
+        bool isAdmin(string user_id);
     }
 }

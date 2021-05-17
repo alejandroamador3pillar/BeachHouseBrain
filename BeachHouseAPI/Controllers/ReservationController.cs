@@ -22,10 +22,11 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly IReservationRepository _repository;
+        private readonly BeachHouseDBContext _context;
 
         public object Summaries { get; private set; }
 
-        public ReservationController(IReservationRepository repository)
+        public ReservationController(IReservationRepository repository, BeachHouseDBContext context)
         {
             _repository = repository;
         }
@@ -35,55 +36,7 @@ namespace BeachHouseAPI.Controllers
         [HttpGet("/reservation/price/{datetime}/{num_days}")]
         public IActionResult GetPrice(DateTime datetime,int num_days)
         {
-            //string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
-            //var datetime = DateTime.Now.AddDays(200);
-            var list = _context.Seasons.ToList();
-            //var num_days = 6;
-            var sum = 0;
-            var hi_season_weekend  = Convert.ToInt16(_context.Params.FirstOrDefault(r => r.Id == 6).Value);
-            var hi_season_weekday  = Convert.ToInt16(_context.Params.FirstOrDefault(r => r.Id == 7).Value);
-            var low_season_weekend = Convert.ToInt16(_context.Params.FirstOrDefault(r => r.Id == 8).Value);
-            var low_season_weekday = Convert.ToInt16(_context.Params.FirstOrDefault(r => r.Id == 9).Value);
-            var flag = 0;
-            var day  = 0;
-
-            for (int i = 1; i <= num_days; i++)
-            {
-                flag = 0;
-                day = (int)datetime.DayOfWeek;
-                for (int e = 0; e < list.Count; e++)
-                {
-                    if (datetime >= list.ElementAt(e).Startdate && datetime <= list.ElementAt(e).Enddate)
-                    {
-                        flag = 1;
-                        if (day >= 5 || day==0)
-                        {
-                            sum = sum + hi_season_weekend;
-                            //return Ok("Temporada alta Fin de semana");
-                        }
-                        else
-                        {
-                            sum = sum + hi_season_weekday;
-                            //return Ok("Temporada alta entre semana");
-                        }
-
-                    }
-                }
-                if (flag==0)
-                {
-                    if (day >= 5 || day == 0)
-                    {
-                        sum = sum + low_season_weekend;
-                        //return BadRequest("Temporada baja fin de seamana");
-                    }
-                    else
-                    {
-                        sum = sum + low_season_weekday;
-                        //return BadRequest("Temporada baja entre seamana");
-                    }
-                }
-                datetime = datetime.AddDays(1);
-            }
+            var sum = _repository.GetPrice(datetime, num_days);
             return Ok(sum);
         }
 

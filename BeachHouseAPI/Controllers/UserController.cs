@@ -112,6 +112,20 @@ namespace BeachHouseAPI.Controllers
             }
 
         }
+        
+        [HttpGet("/isAdmin")]
+        public IActionResult isAdmin()
+        {
+            string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
+            if (_repository.isAdmin(user_id)){
+                return Ok(200);
+            }
+            else
+            {
+                return Ok(401);
+            }
+
+        }
         //**
     }
 }
