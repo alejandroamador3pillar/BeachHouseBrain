@@ -89,7 +89,7 @@ namespace BeachHouseAPI.Repositories
 
         public int ValidateUser2(string user_id, string id)
         {
-            if (ValidateUser(user_id, 1))
+            if (ValidateUser(user_id, 2))
             {
                 if (ValidateUser(id, 3))
                 {

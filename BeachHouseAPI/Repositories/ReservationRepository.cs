@@ -30,6 +30,48 @@ namespace BeachHouseAPI.Repositories
         {
             var dates = new List<AvailableDatesSerializer>();
 
+            var reservations = _context.Reservations.Include(p => p.ReservationDetails).ToList();
+
+            for(int i = 0; i < reservations.Count; i++)
+            {
+                var rd = reservations.ElementAt(i).ReservationDetails;
+                for(int j = 0; j< rd.Count; j++)
+                {
+                    if (rd.Count > 0)
+                    {
+                        var date = new AvailableDatesSerializer
+                        {
+                            Date = rd.ElementAt(j).Date,
+                            Available = false,
+                            Rate = 500,
+                        };
+
+                        if (j == 0 && rd.Count>1)
+                        {
+                            date.Type = 1;
+                        }else if(j == rd.Count - 1)
+                        {
+                            date.Type = 3;
+                        }
+                        else
+                        {
+                            date.Type = 2;
+                        }
+
+                        if(date.Date.Year == value.Year && date.Date.Month == value.Month)
+                        {
+                            dates.Add(date);
+                        }
+
+                        
+
+                    }
+                    
+                }
+                
+            }
+
+            /*
             // Loop from the first day of the month until we hit the next month, moving forward a day at a time
             for (var date = new DateTime(value.Year, value.Month, 1); date.Month == value.Month; date = date.AddDays(1))
             {
@@ -44,7 +86,7 @@ namespace BeachHouseAPI.Repositories
                     dates.Add(rDate);
                 }
                 
-            }
+            }*/
             return dates;
         }
 
@@ -107,6 +149,7 @@ namespace BeachHouseAPI.Repositories
                         await _context.SaveChangesAsync();
                         if (ValidDates(value.StartDate, value.Nights))
                         {
+                            Console.WriteLine(res.User.Id);
                             CreateDetailLines(res.Id, value.StartDate, value.Nights);
                             await _context.SaveChangesAsync();
                             //await CreateAuditRecord(res.Id, req.Id, "Reserve");
@@ -295,6 +338,8 @@ namespace BeachHouseAPI.Repositories
             foreach (Reservations r in res)
             {
                 var record = new ReservationsReportDTO();
+                Console.WriteLine("------");
+
 
                 record.Id = r.Id;
                 record.Date = r.Date;
@@ -303,7 +348,19 @@ namespace BeachHouseAPI.Repositories
                 record.Nights = r.ReservationDetails.Count();
                 record.TotalRate = r.ReservationDetails.Sum(x => x.Rate);
                 record.Status = r.Active;
+                if (r.ReservationDetails.Count > 0)
+                {
+                    record.StartDate = r.ReservationDetails.ElementAtOrDefault(0).Date;
+                    record.EndDate = r.ReservationDetails.ElementAtOrDefault(r.ReservationDetails.Count - 1).Date;
+                }
+                else
+                {
+                    record.StartDate = null;
+                    record.EndDate = null;
 
+                }
+                //record.StartDate = r.ReservationDetails.ElementAtOrDefault(0).Date;
+                
                 list.Add(record);
             }
 
@@ -334,6 +391,7 @@ namespace BeachHouseAPI.Repositories
 
             return res;
         }
+
 
         private IEnumerable<Reservations> GetLastCancellationDayReservations()
         {
@@ -596,7 +654,7 @@ namespace BeachHouseAPI.Repositories
                     Console.WriteLine(r.Date);
                     Console.WriteLine(today);
                     Console.WriteLine(diff);
-                    return 60-((int)(today -r.Date).Days);
+                    return days-((int)(today -r.Date).Days);
                 }
 
             }
