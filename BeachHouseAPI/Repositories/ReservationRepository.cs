@@ -107,6 +107,7 @@ namespace BeachHouseAPI.Repositories
                         await _context.SaveChangesAsync();
                         if (ValidDates(value.StartDate, value.Nights))
                         {
+                            Console.WriteLine(res.User.Id);
                             CreateDetailLines(res.Id, value.StartDate, value.Nights);
                             await _context.SaveChangesAsync();
                             //await CreateAuditRecord(res.Id, req.Id, "Reserve");
@@ -295,6 +296,8 @@ namespace BeachHouseAPI.Repositories
             foreach (Reservations r in res)
             {
                 var record = new ReservationsReportDTO();
+                Console.WriteLine("------");
+
 
                 record.Id = r.Id;
                 record.Date = r.Date;
@@ -303,7 +306,19 @@ namespace BeachHouseAPI.Repositories
                 record.Nights = r.ReservationDetails.Count();
                 record.TotalRate = r.ReservationDetails.Sum(x => x.Rate);
                 record.Status = r.Active;
+                if (r.ReservationDetails.Count > 0)
+                {
+                    record.StartDate = r.ReservationDetails.ElementAtOrDefault(0).Date;
+                    record.EndDate = r.ReservationDetails.ElementAtOrDefault(r.ReservationDetails.Count - 1).Date;
+                }
+                else
+                {
+                    record.StartDate = null;
+                    record.EndDate = null;
 
+                }
+                //record.StartDate = r.ReservationDetails.ElementAtOrDefault(0).Date;
+                
                 list.Add(record);
             }
 
@@ -334,6 +349,7 @@ namespace BeachHouseAPI.Repositories
 
             return res;
         }
+
 
         private IEnumerable<Reservations> GetLastCancellationDayReservations()
         {
@@ -596,7 +612,7 @@ namespace BeachHouseAPI.Repositories
                     Console.WriteLine(r.Date);
                     Console.WriteLine(today);
                     Console.WriteLine(diff);
-                    return 60-((int)(today -r.Date).Days);
+                    return days-((int)(today -r.Date).Days);
                 }
 
             }

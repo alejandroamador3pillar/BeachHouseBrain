@@ -10,5 +10,6 @@ namespace BeachHouseAPI.Serializers
         public DateTime Date { get; set; }
         public bool Available { get; set; }
         public long Rate { get; set; }
+        public int Type { get; set; }
     }
 }

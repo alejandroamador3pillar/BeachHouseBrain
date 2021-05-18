@@ -32,7 +32,7 @@ namespace BeachHouseAPI.Controllers
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
 
-            if (_repository.ValidateUser(user_id, 3))
+            if (_repository.ValidateUser(user_id, 2))
             {
                 var seasons = await _repository.GetSeasons(); ;
                 return Ok(seasons.ToList());
@@ -49,7 +49,7 @@ namespace BeachHouseAPI.Controllers
         public async Task<ActionResult> UpdateSeason([FromBody] SeasonDTO value)
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
-            if (_repository.ValidateUser(user_id, 1))
+            if (_repository.ValidateUser(user_id, 2))
             {
                 var resul = await _repository.UpdateSeason(value);
                 if (resul == 200)
@@ -72,7 +72,7 @@ namespace BeachHouseAPI.Controllers
         public async Task<ActionResult> Insert([FromBody] SeasonDTO value)
         {
             string user_id = Request.Headers.FirstOrDefault(header => header.Key == "user_id").Value;
-            if (_repository.ValidateUser(user_id, 1))
+            if (_repository.ValidateUser(user_id, 2))
             {
                 var resul = await _repository.Insert(value);
                 if (resul == 200)

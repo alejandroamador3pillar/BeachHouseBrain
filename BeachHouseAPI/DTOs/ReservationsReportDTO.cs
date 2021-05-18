@@ -14,6 +14,8 @@ namespace BeachHouseAPI.DTOs
         public int Nights { get; set; } 
         public long? TotalRate { get; set; }
         public bool Status { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
     }
 }
