@@ -30,6 +30,48 @@ namespace BeachHouseAPI.Repositories
         {
             var dates = new List<AvailableDatesSerializer>();
 
+            var reservations = _context.Reservations.Include(p => p.ReservationDetails).ToList();
+
+            for(int i = 0; i < reservations.Count; i++)
+            {
+                var rd = reservations.ElementAt(i).ReservationDetails;
+                for(int j = 0; j< rd.Count; j++)
+                {
+                    if (rd.Count > 0)
+                    {
+                        var date = new AvailableDatesSerializer
+                        {
+                            Date = rd.ElementAt(j).Date,
+                            Available = false,
+                            Rate = 500,
+                        };
+
+                        if (j == 0 && rd.Count>1)
+                        {
+                            date.Type = 1;
+                        }else if(j == rd.Count - 1)
+                        {
+                            date.Type = 3;
+                        }
+                        else
+                        {
+                            date.Type = 2;
+                        }
+
+                        if(date.Date.Year == value.Year && date.Date.Month == value.Month)
+                        {
+                            dates.Add(date);
+                        }
+
+                        
+
+                    }
+                    
+                }
+                
+            }
+
+            /*
             // Loop from the first day of the month until we hit the next month, moving forward a day at a time
             for (var date = new DateTime(value.Year, value.Month, 1); date.Month == value.Month; date = date.AddDays(1))
             {
@@ -44,7 +86,7 @@ namespace BeachHouseAPI.Repositories
                     dates.Add(rDate);
                 }
                 
-            }
+            }*/
             return dates;
         }
 

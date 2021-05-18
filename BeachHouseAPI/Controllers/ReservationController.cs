@@ -22,7 +22,6 @@ namespace BeachHouseAPI.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly IReservationRepository _repository;
-        private readonly BeachHouseDBContext _context;
 
         public object Summaries { get; private set; }
 
@@ -49,7 +48,7 @@ namespace BeachHouseAPI.Controllers
             }
             else
             {
-                return Ok( _repository.GetAvailableDates(value));
+                return Ok(_repository.GetDates(value));
             }
         }
 
